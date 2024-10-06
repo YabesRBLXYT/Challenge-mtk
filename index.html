@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Challenge</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+        }
+        .challenge {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="number"] {
+            width: 50px;
+            padding: 5px;
+            margin: 5px;
+            font-size: 18px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .result {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .level {
+            margin: 10px;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Math Challenge</h1>
+
+    <div id="challenge-container"></div>
+
+    <script>
+        async function loadChallenges() {
+            const response = await fetch('level.json');
+            const challenges = await response.json();
+            Object.keys(challenges).forEach(level => {
+                challenges[level].forEach((challenge, index) => {
+                    createChallenge(level, index, challenge);
+                });
+            });
+        }
+
+        function createChallenge(level, index, challenge) {
+            const container = document.getElementById('challenge-container');
+            const challengeDiv = document.createElement('div');
+            challengeDiv.classList.add('challenge');
+
+            let equation;
+            if (level === "easy") {
+                equation = `(<input type="number" id="a-${level}-${index}" placeholder="...">) + 
+                            (<input type="number" id="b-${level}-${index}" placeholder="...">) = 1000`;
+            } else if (level === "medium") {
+                equation = `(<input type="number" id="a-${level}-${index}" placeholder="..."> × 
+                            <input type="number" id="b-${level}-${index}" placeholder="...">) + 
+                            <input type="number" id="c-${level}-${index}" placeholder="..."> = 1000`;
+            } else if (level === "hard" || level === "expert") {
+                equation = `(<input type="number" id="a-${level}-${index}" placeholder="..."> × 
+                            <input type="number" id="b-${level}-${index}" placeholder="...">) + 
+                            <input type="number" id="c-${level}-${index}" placeholder="..."> − 
+                            (<input type="number" id="d-${level}-${index}" placeholder="..."> ÷ 
+                            <input type="number" id="e-${level}-${index}" placeholder="...">) = 1000`;
+            }
+
+            challengeDiv.innerHTML = `
+                <div class="level">${level.charAt(0).toUpperCase() + level.slice(1)} - Question ${index + 1}</div>
+                <div>${equation}</div>
+                <button onclick="checkAnswer('${level}', ${index}, ${JSON.stringify(challenge)})">Submit</button>
+                <div id="result-${level}-${index}" class="result"></div>
+            `;
+            container.appendChild(challengeDiv);
+        }
+
+        function checkAnswer(level, index, challenge) {
+            const a = parseFloat(document.getElementById(`a-${level}-${index}`).value);
+            const b = parseFloat(document.getElementById(`b-${level}-${index}`).value);
+            const c = parseFloat(document.getElementById(`c-${level}-${index}`).value);
+            let d, e;
+            if (level === "hard" || level === "expert") {
+                d = parseFloat(document.getElementById(`d-${level}-${index}`).value);
+                e = parseFloat(document.getElementById(`e-${level}-${index}`).value);
+            }
+
+            let result;
+            if (level === "easy") {
+                result = a + b;
+            } else if (level === "medium") {
+                result = (a * b) + c;
+            } else {
+                result = (a * b) + c - (d / e);
+            }
+
+            const resultElement = document.getElementById(`result-${level}-${index}`);
+            if (result === 1000) {
+                resultElement.textContent = "Correct!";
+                resultElement.style.color = "green";
+            } else {
+                resultElement.textContent = "Try again!";
+                resultElement.style.color = "red";
+            }
+        }
+
+        window.onload = loadChallenges;
+    </script>
+
+</body>
+</html>
+  
